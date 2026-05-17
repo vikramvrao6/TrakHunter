@@ -1,0 +1,8 @@
+{
+  "mass": 720,
+  "tire_grip": 1.2,
+  "wing_angle": 15,
+  "drag_coefficient": 0.40,
+  "brake_bias": 0.62,
+  "gear_ratio_preset": 2
+}

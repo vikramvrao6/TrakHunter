@@ -1,0 +1,11 @@
+{
+  "name": "Circuit Alpha",
+  "segments": [
+    { "type": "straight", "length": 800, "sector": 1 },
+    { "type": "corner",   "length": 188, "corner_radius": 120, "sector": 1 },
+    { "type": "straight", "length": 400, "sector": 2 },
+    { "type": "corner",   "length": 125, "corner_radius":  80, "sector": 2 },
+    { "type": "straight", "length": 600, "sector": 3 },
+    { "type": "corner",   "length": 157, "corner_radius": 100, "sector": 3 }
+  ]
+}
