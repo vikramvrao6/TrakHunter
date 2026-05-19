@@ -23,4 +23,6 @@ struct LapResult {
 };
 
 // Serialise LapResult to a JSON string (pretty-printed).
-std::string lap_result_to_json(const LapResult& result);
+// full=false → summary only (no telemetry array, telemetry_points count instead).
+// full=true  → complete output including the telemetry array.
+std::string lap_result_to_json(const LapResult& result, bool full = false);
