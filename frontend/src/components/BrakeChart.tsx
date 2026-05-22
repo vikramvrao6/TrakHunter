@@ -6,7 +6,6 @@ import type { TelemetryPoint } from '../api';
 
 interface Props {
   data: TelemetryPoint[];
-  cursorDistance?: number;
 }
 
 interface ChartPoint {
@@ -38,23 +37,10 @@ function sectorBoundaries(data: TelemetryPoint[]): number[] {
 const BRAKE_COLOR    = '#ff4444';
 const THROTTLE_COLOR = '#22c55e';
 
-export default function BrakeChart({ data, cursorDistance }: Props) {
+export default function BrakeChart({ data }: Props) {
   // All hooks MUST come before any conditional return (Rules of Hooks)
   const points     = useMemo(() => thin(data, 2), [data]);
   const boundaries = useMemo(() => sectorBoundaries(data), [data]);
-
-  // Snap cursor to nearest distance that exists in `points`
-  const cursorX = useMemo(() => {
-    if (cursorDistance == null || !points.length) return null;
-    let best = points[0].distance;
-    let bestDiff = Math.abs(cursorDistance - best);
-    for (const p of points) {
-      const diff = Math.abs(p.distance - cursorDistance);
-      if (diff < bestDiff) { best = p.distance; bestDiff = diff; }
-      if (p.distance > cursorDistance + 200) break;
-    }
-    return best;
-  }, [cursorDistance, points]);
 
   if (!data.length) return null;
 
@@ -105,13 +91,6 @@ export default function BrakeChart({ data, cursorDistance }: Props) {
           {boundaries.map(d => (
             <ReferenceLine key={d} x={d} stroke="#4b5563" strokeDasharray="4 2" />
           ))}
-          {cursorX != null && (
-            <ReferenceLine
-              x={cursorX}
-              stroke="rgba(232,255,0,0.75)"
-              strokeWidth={1.5}
-            />
-          )}
           <Area
             type="monotone"
             dataKey="throttle"

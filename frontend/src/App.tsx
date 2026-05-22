@@ -47,11 +47,13 @@ export default function App() {
   }, []);
 
   // Derived playback values
-  const telemetry      = result?.telemetry ?? [];
-  const currentPoint   = telemetry[playbackIndex] ?? null;
-  const totalLapDist   = telemetry.length > 0 ? telemetry[telemetry.length - 1].distance : 0;
-  const playbackProgress =
+  const telemetry         = result?.telemetry ?? [];
+  const currentPoint      = telemetry[playbackIndex] ?? null;
+  const totalLapDist      = telemetry.length > 0 ? telemetry[telemetry.length - 1].distance : 0;
+  const playbackProgress  =
     totalLapDist > 0 && currentPoint ? currentPoint.distance / totalLapDist : 0;
+  // Slice shown to charts — grows from one point to full lap as playback runs
+  const displayedTelemetry = telemetry.slice(0, playbackIndex + 1);
 
   // Reset playback when a new simulation result arrives
   useEffect(() => {
@@ -169,6 +171,7 @@ export default function App() {
           baselineSetup={baselineSetup}
           currentPoint={currentPoint}
           isPlaying={isPlaying}
+          displayedTelemetry={displayedTelemetry}
         />
       </main>
     </div>

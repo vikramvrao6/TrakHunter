@@ -34,11 +34,12 @@ interface Props {
   baselineSetup: VehicleSetup | null;
   currentPoint: TelemetryPoint | null;
   isPlaying: boolean;
+  displayedTelemetry: TelemetryPoint[];
 }
 
 export default function TelemetryDashboard({
   result, error, loading, baseline, baselineSetup,
-  currentPoint, isPlaying,
+  currentPoint, isPlaying, displayedTelemetry,
 }: Props) {
   if (loading) {
     return (
@@ -107,9 +108,9 @@ export default function TelemetryDashboard({
         <LiveTelemetry point={currentPoint} isPlaying={isPlaying} />
       )}
 
-      {/* ── Charts ──────────────────────────────────────────────── */}
-      <SpeedChart data={telemetry} cursorDistance={currentPoint?.distance} />
-      <BrakeChart data={telemetry} cursorDistance={currentPoint?.distance} />
+      {/* ── Charts — only render points up to current playback index ── */}
+      <SpeedChart data={displayedTelemetry} />
+      <BrakeChart data={displayedTelemetry} />
 
       {/* ── Comparison ──────────────────────────────────────────── */}
       {baseline
