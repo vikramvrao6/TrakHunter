@@ -1,0 +1,15 @@
+{
+  "name": "Sarthe Speedway",
+  "segments": [
+    { "type": "straight", "length": 2100, "sector": 1 },
+    { "type": "corner",   "length": 400,  "corner_radius": 450, "sector": 1 },
+    { "type": "straight", "length": 800,  "sector": 2 },
+    { "type": "corner",   "length": 220,  "corner_radius": 280, "sector": 2 },
+    { "type": "straight", "length": 350,  "sector": 2 },
+    { "type": "corner",   "length": 180,  "corner_radius": 120, "sector": 2 },
+    { "type": "straight", "length": 250,  "sector": 3 },
+    { "type": "corner",   "length": 320,  "corner_radius": 380, "sector": 3 },
+    { "type": "straight", "length": 400,  "sector": 3 },
+    { "type": "corner",   "length": 140,  "corner_radius": 90,  "sector": 3 }
+  ]
+}

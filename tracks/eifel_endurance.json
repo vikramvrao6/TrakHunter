@@ -1,0 +1,19 @@
+{
+  "name": "Eifel Endurance",
+  "segments": [
+    { "type": "straight", "length": 850,  "sector": 1 },
+    { "type": "corner",   "length": 220,  "corner_radius": 180, "sector": 1 },
+    { "type": "straight", "length": 180,  "sector": 1 },
+    { "type": "corner",   "length": 170,  "corner_radius": 130, "sector": 1 },
+    { "type": "straight", "length": 350,  "sector": 2 },
+    { "type": "corner",   "length": 160,  "corner_radius": 100, "sector": 2 },
+    { "type": "straight", "length": 90,   "sector": 2 },
+    { "type": "corner",   "length": 220,  "corner_radius": 160, "sector": 2 },
+    { "type": "straight", "length": 280,  "sector": 2 },
+    { "type": "corner",   "length": 140,  "corner_radius": 85,  "sector": 2 },
+    { "type": "straight", "length": 500,  "sector": 3 },
+    { "type": "corner",   "length": 190,  "corner_radius": 140, "sector": 3 },
+    { "type": "straight", "length": 200,  "sector": 3 },
+    { "type": "corner",   "length": 250,  "corner_radius": 200, "sector": 3 }
+  ]
+}

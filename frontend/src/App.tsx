@@ -104,6 +104,7 @@ export default function App() {
           canSaveBaseline={!!result}
           hasBaseline={!!baseline}
           onSaveBaseline={handleSaveBaseline}
+          track={track}
         />
         <TelemetryDashboard
           result={result}

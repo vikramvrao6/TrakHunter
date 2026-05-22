@@ -1,4 +1,5 @@
 import type { VehicleSetup } from '../api';
+import TrackMap from './TrackMap';
 
 interface SliderRowProps {
   label: string;
@@ -45,11 +46,13 @@ interface SetupPanelProps {
   canSaveBaseline: boolean;
   hasBaseline: boolean;
   onSaveBaseline: () => void;
+  track: string;
 }
 
 export default function SetupPanel({
   setup, onSetupChange, onRun, loading,
   canSaveBaseline, hasBaseline, onSaveBaseline,
+  track,
 }: SetupPanelProps) {
   return (
     <aside className="setup-panel">
@@ -106,6 +109,8 @@ export default function SetupPanel({
       >
         {hasBaseline ? '◎  Update Baseline' : '◎  Save as Baseline'}
       </button>
+
+      <TrackMap track={track} />
 
       <button
         className={`run-btn ${loading ? 'loading' : ''}`}
