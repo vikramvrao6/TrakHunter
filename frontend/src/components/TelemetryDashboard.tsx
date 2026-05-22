@@ -68,6 +68,12 @@ export default function TelemetryDashboard({
 
   const { lap_time, top_speed, avg_corner_speed, braking_distance, sector_times, telemetry } = result;
 
+  // Fixed x-axis domain derived from the FULL telemetry so gridlines never
+  // move as the displayed slice grows during playback.
+  const totalLapDist = telemetry.length > 0
+    ? Math.ceil(telemetry[telemetry.length - 1].distance)
+    : 0;
+
   return (
     <div className="dashboard">
       {/* ── Summary metrics ─────────────────────────────────────── */}
@@ -108,9 +114,9 @@ export default function TelemetryDashboard({
         <LiveTelemetry point={currentPoint} isPlaying={isPlaying} />
       )}
 
-      {/* ── Charts — only render points up to current playback index ── */}
-      <SpeedChart data={displayedTelemetry} />
-      <BrakeChart data={displayedTelemetry} />
+      {/* ── Charts — slice grows during playback; axis domain stays fixed ── */}
+      <SpeedChart data={displayedTelemetry} totalDistance={totalLapDist} />
+      <BrakeChart data={displayedTelemetry} totalDistance={totalLapDist} />
 
       {/* ── Comparison ──────────────────────────────────────────── */}
       {baseline

@@ -6,6 +6,7 @@ import type { TelemetryPoint } from '../api';
 
 interface Props {
   data: TelemetryPoint[];
+  totalDistance: number;   // full lap length — fixes the x-axis domain
 }
 
 interface ChartPoint {
@@ -38,7 +39,7 @@ function sectorBoundaries(data: TelemetryPoint[]): number[] {
 
 const SPEED_COLOR = '#00d4ff';
 
-export default function SpeedChart({ data }: Props) {
+export default function SpeedChart({ data, totalDistance }: Props) {
   // All hooks MUST come before any conditional return (Rules of Hooks)
   const points     = useMemo(() => thin(data, 2), [data]);
   const boundaries = useMemo(() => sectorBoundaries(data), [data]);
@@ -53,6 +54,8 @@ export default function SpeedChart({ data }: Props) {
           <CartesianGrid strokeDasharray="3 3" stroke="#2d3044" />
           <XAxis
             dataKey="distance"
+            type="number"
+            domain={[0, totalDistance]}
             stroke="#6b7280"
             tick={{ fill: '#6b7280', fontSize: 11 }}
             label={{ value: 'Distance (m)', position: 'insideBottomRight', offset: -4, fill: '#6b7280', fontSize: 11 }}
