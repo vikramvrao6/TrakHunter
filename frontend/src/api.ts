@@ -39,6 +39,13 @@ export interface LapResult {
 
 const API_BASE = '/api';
 
+export async function getTracks(): Promise<string[]> {
+  const res = await fetch(`${API_BASE}/tracks`);
+  if (!res.ok) throw new Error(`Failed to fetch tracks: ${res.statusText}`);
+  const data = await res.json() as { tracks: string[] };
+  return data.tracks;
+}
+
 export async function runSimulation(
   trackName: string,
   setup: VehicleSetup
