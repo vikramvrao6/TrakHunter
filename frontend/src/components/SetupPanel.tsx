@@ -1,5 +1,6 @@
 import type { VehicleSetup } from '../api';
 import TrackMap from './TrackMap';
+import PlaybackControls, { type PlaybackProps } from './PlaybackControls';
 
 interface SliderRowProps {
   label: string;
@@ -47,12 +48,13 @@ interface SetupPanelProps {
   hasBaseline: boolean;
   onSaveBaseline: () => void;
   track: string;
+  playback: PlaybackProps;
 }
 
 export default function SetupPanel({
   setup, onSetupChange, onRun, loading,
   canSaveBaseline, hasBaseline, onSaveBaseline,
-  track,
+  track, playback,
 }: SetupPanelProps) {
   return (
     <aside className="setup-panel">
@@ -110,7 +112,9 @@ export default function SetupPanel({
         {hasBaseline ? '◎  Update Baseline' : '◎  Save as Baseline'}
       </button>
 
-      <TrackMap track={track} />
+      <TrackMap track={track} playbackProgress={playback.progress} />
+
+      <PlaybackControls {...playback} />
 
       <button
         className={`run-btn ${loading ? 'loading' : ''}`}

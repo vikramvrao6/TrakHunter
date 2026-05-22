@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import SetupPanel from './components/SetupPanel';
 import TelemetryDashboard from './components/TelemetryDashboard';
 import TrackSelector from './components/TrackSelector';
@@ -29,6 +29,11 @@ export default function App() {
   const [baseline, setBaseline]           = useState<LapResult | null>(null);
   const [baselineSetup, setBaselineSetup] = useState<VehicleSetup | null>(null);
 
+  // ── Playback ───────────────────────────────────────────────────────────────
+  const [playbackIndex, setPlaybackIndex] = useState(0);
+  const [isPlaying, setIsPlaying]         = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+
   // Fetch available tracks on mount
   useEffect(() => {
     getTracks()
@@ -40,6 +45,43 @@ export default function App() {
       })
       .catch(() => setTracks(['circuit_alpha'])); // fallback
   }, []);
+
+  // Derived playback values
+  const telemetry      = result?.telemetry ?? [];
+  const currentPoint   = telemetry[playbackIndex] ?? null;
+  const totalLapDist   = telemetry.length > 0 ? telemetry[telemetry.length - 1].distance : 0;
+  const playbackProgress =
+    totalLapDist > 0 && currentPoint ? currentPoint.distance / totalLapDist : 0;
+
+  // Reset playback when a new simulation result arrives
+  useEffect(() => {
+    setPlaybackIndex(0);
+    setIsPlaying(false);
+  }, [result]);
+
+  // Playback engine: 50 ms tick, advance `playbackSpeed` indices per tick
+  useEffect(() => {
+    if (!isPlaying || telemetry.length === 0) return;
+    const id = setInterval(() => {
+      setPlaybackIndex(prev => {
+        const next = prev + playbackSpeed;
+        if (next >= telemetry.length - 1) {
+          setIsPlaying(false);
+          return telemetry.length - 1;
+        }
+        return next;
+      });
+    }, 50);
+    return () => clearInterval(id);
+  }, [isPlaying, playbackSpeed, telemetry.length]);
+
+  const handlePlay       = useCallback(() => setIsPlaying(true), []);
+  const handlePause      = useCallback(() => setIsPlaying(false), []);
+  const handleReset      = useCallback(() => { setPlaybackIndex(0); setIsPlaying(false); }, []);
+  const handleJumpToEnd  = useCallback(() => {
+    setPlaybackIndex(Math.max(0, telemetry.length - 1));
+    setIsPlaying(false);
+  }, [telemetry.length]);
 
   function patchSetup(patch: Partial<VehicleSetup>) {
     setSetup(prev => ({ ...prev, ...patch }));
@@ -105,6 +147,19 @@ export default function App() {
           hasBaseline={!!baseline}
           onSaveBaseline={handleSaveBaseline}
           track={track}
+          playback={{
+            index:          playbackIndex,
+            total:          telemetry.length,
+            isPlaying,
+            speed:          playbackSpeed,
+            progress:       playbackProgress,
+            disabled:       telemetry.length === 0,
+            onPlay:         handlePlay,
+            onPause:        handlePause,
+            onReset:        handleReset,
+            onJumpToEnd:    handleJumpToEnd,
+            onSpeedChange:  setPlaybackSpeed,
+          }}
         />
         <TelemetryDashboard
           result={result}
@@ -112,6 +167,8 @@ export default function App() {
           loading={loading}
           baseline={baseline}
           baselineSetup={baselineSetup}
+          currentPoint={currentPoint}
+          isPlaying={isPlaying}
         />
       </main>
     </div>

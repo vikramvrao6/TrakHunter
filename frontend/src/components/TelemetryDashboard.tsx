@@ -1,7 +1,8 @@
-import type { LapResult, VehicleSetup } from '../api';
+import type { LapResult, TelemetryPoint, VehicleSetup } from '../api';
 import SpeedChart from './SpeedChart';
 import BrakeChart from './BrakeChart';
 import ComparisonTable from './ComparisonTable';
+import LiveTelemetry from './LiveTelemetry';
 
 interface MetricCardProps {
   label: string;
@@ -31,9 +32,14 @@ interface Props {
   loading: boolean;
   baseline: LapResult | null;
   baselineSetup: VehicleSetup | null;
+  currentPoint: TelemetryPoint | null;
+  isPlaying: boolean;
 }
 
-export default function TelemetryDashboard({ result, error, loading, baseline, baselineSetup }: Props) {
+export default function TelemetryDashboard({
+  result, error, loading, baseline, baselineSetup,
+  currentPoint, isPlaying,
+}: Props) {
   if (loading) {
     return (
       <div className="dashboard-placeholder">
@@ -96,9 +102,14 @@ export default function TelemetryDashboard({ result, error, loading, baseline, b
         ))}
       </div>
 
+      {/* ── Live telemetry strip (visible whenever playback position is set) */}
+      {currentPoint && (
+        <LiveTelemetry point={currentPoint} isPlaying={isPlaying} />
+      )}
+
       {/* ── Charts ──────────────────────────────────────────────── */}
-      <SpeedChart data={telemetry} />
-      <BrakeChart data={telemetry} />
+      <SpeedChart data={telemetry} cursorDistance={currentPoint?.distance} />
+      <BrakeChart data={telemetry} cursorDistance={currentPoint?.distance} />
 
       {/* ── Comparison ──────────────────────────────────────────── */}
       {baseline

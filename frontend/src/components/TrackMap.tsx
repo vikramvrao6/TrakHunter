@@ -1,3 +1,5 @@
+import { useRef, useEffect, useState } from 'react';
+
 interface TrackConfig {
   viewBox: string;
   path: string;
@@ -95,12 +97,34 @@ const TRACK_CONFIGS: Record<string, TrackConfig> = {
 
 const FALLBACK = TRACK_CONFIGS.circuit_alpha;
 
+interface CarPos { x: number; y: number; angle: number; }
+
 interface Props {
   track: string;
+  playbackProgress?: number;   // 0..1; undefined = no car shown
 }
 
-export default function TrackMap({ track }: Props) {
-  const cfg = TRACK_CONFIGS[track] ?? FALLBACK;
+export default function TrackMap({ track, playbackProgress }: Props) {
+  const cfg     = TRACK_CONFIGS[track] ?? FALLBACK;
+  const pathRef = useRef<SVGPathElement>(null);
+  const [carPos, setCarPos] = useState<CarPos | null>(null);
+
+  // Recompute car position whenever progress or track changes
+  useEffect(() => {
+    const el = pathRef.current;
+    if (!el || playbackProgress == null) {
+      setCarPos(null);
+      return;
+    }
+    const total = el.getTotalLength();
+    const t     = playbackProgress * total;
+    const eps   = Math.max(1, total * 0.005);
+    const pt    = el.getPointAtLength(t);
+    const ptA   = el.getPointAtLength(Math.max(0, t - eps));
+    const ptB   = el.getPointAtLength(Math.min(total, t + eps));
+    const angle = Math.atan2(ptB.y - ptA.y, ptB.x - ptA.x) * (180 / Math.PI);
+    setCarPos({ x: pt.x, y: pt.y, angle });
+  }, [playbackProgress, track]);
 
   return (
     <div className="track-map-card">
@@ -122,8 +146,9 @@ export default function TrackMap({ track }: Props) {
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {/* Centre / outline — thin neon accent */}
+          {/* Centre / outline — thin neon accent; ref used for path length */}
           <path
+            ref={pathRef}
             d={cfg.path}
             fill="none"
             stroke="rgba(232,255,0,0.55)"
@@ -131,6 +156,33 @@ export default function TrackMap({ track }: Props) {
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+
+          {/* ── Car icon ──────────────────────────────────────────────── */}
+          {carPos && (
+            <g
+              transform={`translate(${carPos.x.toFixed(2)},${carPos.y.toFixed(2)}) rotate(${carPos.angle.toFixed(1)})`}
+              aria-label="car position"
+            >
+              {/* Glow halo */}
+              <ellipse cx="0" cy="0" rx="10" ry="6"
+                fill="rgba(232,255,0,0.12)"
+                stroke="none"
+              />
+              {/* Main body — pointed teardrop facing +x */}
+              <path
+                d="M 8,0 L 3,-2.5 L -5,-2 L -7,0 L -5,2 L 3,2.5 Z"
+                fill="rgba(232,255,0,0.95)"
+              />
+              {/* Front wing — thin bar across nose */}
+              <rect x="6.5" y="-4" width="2" height="8" rx="0.6"
+                fill="rgba(232,255,0,0.55)"
+              />
+              {/* Rear wing — wider bar at tail */}
+              <rect x="-9" y="-4.5" width="2.5" height="9" rx="0.6"
+                fill="rgba(232,255,0,0.55)"
+              />
+            </g>
+          )}
         </svg>
       </div>
 

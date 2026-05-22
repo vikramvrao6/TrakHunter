@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
@@ -5,6 +6,7 @@ import type { TelemetryPoint } from '../api';
 
 interface Props {
   data: TelemetryPoint[];
+  cursorDistance?: number;
 }
 
 interface ChartPoint {
@@ -37,11 +39,26 @@ function sectorBoundaries(data: TelemetryPoint[]): number[] {
 
 const SPEED_COLOR = '#00d4ff';
 
-export default function SpeedChart({ data }: Props) {
-  if (!data.length) return null;
+export default function SpeedChart({ data, cursorDistance }: Props) {
+  // All hooks MUST come before any conditional return (Rules of Hooks)
+  const points     = useMemo(() => thin(data, 2), [data]);
+  const boundaries = useMemo(() => sectorBoundaries(data), [data]);
 
-  const points = thin(data, 2);
-  const boundaries = sectorBoundaries(data);
+  // Snap cursor to nearest distance that actually exists in `points` so the
+  // categorical XAxis can find an exact match and render the ReferenceLine.
+  const cursorX = useMemo(() => {
+    if (cursorDistance == null || !points.length) return null;
+    let best = points[0].distance;
+    let bestDiff = Math.abs(cursorDistance - best);
+    for (const p of points) {
+      const diff = Math.abs(p.distance - cursorDistance);
+      if (diff < bestDiff) { best = p.distance; bestDiff = diff; }
+      if (p.distance > cursorDistance + 200) break;
+    }
+    return best;
+  }, [cursorDistance, points]);
+
+  if (!data.length) return null;
 
   return (
     <div className="chart-card">
@@ -70,6 +87,13 @@ export default function SpeedChart({ data }: Props) {
           {boundaries.map(d => (
             <ReferenceLine key={d} x={d} stroke="#4b5563" strokeDasharray="4 2" label={{ value: 'S', fill: '#6b7280', fontSize: 10 }} />
           ))}
+          {cursorX != null && (
+            <ReferenceLine
+              x={cursorX}
+              stroke="rgba(232,255,0,0.75)"
+              strokeWidth={1.5}
+            />
+          )}
           <Line
             type="monotone"
             dataKey="speed_kmh"
