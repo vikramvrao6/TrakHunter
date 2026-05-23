@@ -71,8 +71,8 @@ export default function SpeedChart({ data, totalDistance, cursorDistance, curren
             contentStyle={{ background: '#1a1d27', border: '1px solid #2d3044', borderRadius: 6 }}
             labelStyle={{ color: '#9ca3af', fontSize: 11 }}
             itemStyle={{ color: SPEED_COLOR }}
-            formatter={(v: number) => [`${v} km/h`, 'Speed']}
-            labelFormatter={(d: number) => `${d} m`}
+            formatter={(v) => [`${Number(v).toFixed(1)} km/h`, 'Speed']}
+            labelFormatter={(d) => `${Number(d)} m`}
           />
 
           {/* Sector boundaries */}

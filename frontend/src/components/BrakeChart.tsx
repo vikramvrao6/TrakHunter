@@ -88,11 +88,11 @@ export default function BrakeChart({ data, totalDistance, cursorDistance }: Prop
           <Tooltip
             contentStyle={{ background: '#1a1d27', border: '1px solid #2d3044', borderRadius: 6 }}
             labelStyle={{ color: '#9ca3af', fontSize: 11 }}
-            formatter={(v: number, name: string) => [
-              v.toFixed(2),
+            formatter={(v, name) => [
+              Number(v).toFixed(2),
               name === 'brake' ? 'Brake' : 'Throttle',
             ]}
-            labelFormatter={(d: number) => `${d} m`}
+            labelFormatter={(d) => `${Number(d)} m`}
           />
 
           {/* Sector boundaries */}
