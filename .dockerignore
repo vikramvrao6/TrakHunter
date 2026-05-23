@@ -1,0 +1,22 @@
+# Version control
+.git/
+.gitignore
+
+# Claude Code local config
+.claude/
+
+# Frontend — not needed in the API image
+frontend/
+
+# Pre-built engine binary (rebuilt inside Docker)
+engine/build/
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
