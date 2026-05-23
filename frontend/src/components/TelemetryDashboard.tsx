@@ -34,12 +34,13 @@ interface Props {
   baselineSetup: VehicleSetup | null;
   currentPoint: TelemetryPoint | null;
   isPlaying: boolean;
-  displayedTelemetry: TelemetryPoint[];
+  cursorDistance: number;      // metres — drives the chart cursor line
+  currentSpeed: number | null; // km/h — drives the speed dot
 }
 
 export default function TelemetryDashboard({
   result, error, loading, baseline, baselineSetup,
-  currentPoint, isPlaying, displayedTelemetry,
+  currentPoint, isPlaying, cursorDistance, currentSpeed,
 }: Props) {
   if (loading) {
     return (
@@ -114,9 +115,18 @@ export default function TelemetryDashboard({
         <LiveTelemetry point={currentPoint} isPlaying={isPlaying} />
       )}
 
-      {/* ── Charts — slice grows during playback; axis domain stays fixed ── */}
-      <SpeedChart data={displayedTelemetry} totalDistance={totalLapDist} />
-      <BrakeChart data={displayedTelemetry} totalDistance={totalLapDist} />
+      {/* ── Charts — full trace always visible; amber cursor tracks playback position ── */}
+      <SpeedChart
+        data={telemetry}
+        totalDistance={totalLapDist}
+        cursorDistance={cursorDistance}
+        currentSpeed={currentSpeed}
+      />
+      <BrakeChart
+        data={telemetry}
+        totalDistance={totalLapDist}
+        cursorDistance={cursorDistance}
+      />
 
       {/* ── Comparison ──────────────────────────────────────────── */}
       {baseline

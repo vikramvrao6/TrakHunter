@@ -1,12 +1,15 @@
 import { useMemo } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, ReferenceDot,
 } from 'recharts';
 import type { TelemetryPoint } from '../api';
 
 interface Props {
   data: TelemetryPoint[];
-  totalDistance: number;   // full lap length — fixes the x-axis domain
+  totalDistance: number;    // full lap length — fixes the x-axis domain
+  cursorDistance: number;   // current playback position in metres
+  currentSpeed: number | null; // km/h at cursor (null when no simulation yet)
 }
 
 interface ChartPoint {
@@ -15,10 +18,9 @@ interface ChartPoint {
   sector: number;
 }
 
-// Sample to keep Recharts responsive without dropping shape
-function thin(arr: TelemetryPoint[], every: number): ChartPoint[] {
+function thin(arr: TelemetryPoint[]): ChartPoint[] {
   return arr
-    .filter((_, i) => i % every === 0)
+    .filter((_, i) => i % 2 === 0)
     .map(p => ({
       distance: Math.round(p.distance),
       speed_kmh: parseFloat((p.speed * 3.6).toFixed(1)),
@@ -26,7 +28,6 @@ function thin(arr: TelemetryPoint[], every: number): ChartPoint[] {
     }));
 }
 
-// Sector boundary distances for reference lines
 function sectorBoundaries(data: TelemetryPoint[]): number[] {
   const bounds: number[] = [];
   for (let i = 1; i < data.length; i++) {
@@ -37,11 +38,12 @@ function sectorBoundaries(data: TelemetryPoint[]): number[] {
   return bounds;
 }
 
-const SPEED_COLOR = '#00d4ff';
+const SPEED_COLOR  = '#00d4ff';
+const CURSOR_COLOR = '#f59e0b';
 
-export default function SpeedChart({ data, totalDistance }: Props) {
+export default function SpeedChart({ data, totalDistance, cursorDistance, currentSpeed }: Props) {
   // All hooks MUST come before any conditional return (Rules of Hooks)
-  const points     = useMemo(() => thin(data, 2), [data]);
+  const points     = useMemo(() => thin(data), [data]);
   const boundaries = useMemo(() => sectorBoundaries(data), [data]);
 
   if (!data.length) return null;
@@ -72,9 +74,17 @@ export default function SpeedChart({ data, totalDistance }: Props) {
             formatter={(v: number) => [`${v} km/h`, 'Speed']}
             labelFormatter={(d: number) => `${d} m`}
           />
+
+          {/* Sector boundaries */}
           {boundaries.map(d => (
-            <ReferenceLine key={d} x={d} stroke="#4b5563" strokeDasharray="4 2" label={{ value: 'S', fill: '#6b7280', fontSize: 10 }} />
+            <ReferenceLine
+              key={d} x={d}
+              stroke="#4b5563" strokeDasharray="4 2"
+              label={{ value: 'S', fill: '#6b7280', fontSize: 10 }}
+            />
           ))}
+
+          {/* Full speed trace — always visible */}
           <Line
             type="monotone"
             dataKey="speed_kmh"
@@ -83,6 +93,27 @@ export default function SpeedChart({ data, totalDistance }: Props) {
             dot={false}
             activeDot={{ r: 4, fill: SPEED_COLOR }}
           />
+
+          {/* Playback cursor */}
+          {cursorDistance > 0 && (
+            <ReferenceLine
+              x={cursorDistance}
+              stroke={CURSOR_COLOR}
+              strokeWidth={1.5}
+            />
+          )}
+
+          {/* Live position dot */}
+          {cursorDistance > 0 && currentSpeed !== null && (
+            <ReferenceDot
+              x={cursorDistance}
+              y={currentSpeed}
+              r={5}
+              fill={CURSOR_COLOR}
+              stroke="#1a1d27"
+              strokeWidth={2}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

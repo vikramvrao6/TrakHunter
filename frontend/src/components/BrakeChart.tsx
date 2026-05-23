@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import type { TelemetryPoint } from '../api';
 
 interface Props {
   data: TelemetryPoint[];
-  totalDistance: number;   // full lap length — fixes the x-axis domain
+  totalDistance: number;    // full lap length — fixes the x-axis domain
+  cursorDistance: number;   // current playback position in metres
 }
 
 interface ChartPoint {
@@ -15,9 +17,9 @@ interface ChartPoint {
   throttle: number;
 }
 
-function thin(arr: TelemetryPoint[], every: number): ChartPoint[] {
+function thin(arr: TelemetryPoint[]): ChartPoint[] {
   return arr
-    .filter((_, i) => i % every === 0)
+    .filter((_, i) => i % 2 === 0)
     .map(p => ({
       distance: Math.round(p.distance),
       brake: parseFloat(p.brake.toFixed(2)),
@@ -37,10 +39,11 @@ function sectorBoundaries(data: TelemetryPoint[]): number[] {
 
 const BRAKE_COLOR    = '#ff4444';
 const THROTTLE_COLOR = '#22c55e';
+const CURSOR_COLOR   = '#f59e0b';
 
-export default function BrakeChart({ data, totalDistance }: Props) {
+export default function BrakeChart({ data, totalDistance, cursorDistance }: Props) {
   // All hooks MUST come before any conditional return (Rules of Hooks)
-  const points     = useMemo(() => thin(data, 2), [data]);
+  const points     = useMemo(() => thin(data), [data]);
   const boundaries = useMemo(() => sectorBoundaries(data), [data]);
 
   if (!data.length) return null;
@@ -59,11 +62,11 @@ export default function BrakeChart({ data, totalDistance }: Props) {
         <AreaChart data={points} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="brakeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={BRAKE_COLOR} stopOpacity={0.3} />
-              <stop offset="95%" stopColor={BRAKE_COLOR} stopOpacity={0.02} />
+              <stop offset="5%"  stopColor={BRAKE_COLOR}    stopOpacity={0.3} />
+              <stop offset="95%" stopColor={BRAKE_COLOR}    stopOpacity={0.02} />
             </linearGradient>
             <linearGradient id="throttleGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={THROTTLE_COLOR} stopOpacity={0.3} />
+              <stop offset="5%"  stopColor={THROTTLE_COLOR} stopOpacity={0.3} />
               <stop offset="95%" stopColor={THROTTLE_COLOR} stopOpacity={0.02} />
             </linearGradient>
           </defs>
@@ -91,9 +94,13 @@ export default function BrakeChart({ data, totalDistance }: Props) {
             ]}
             labelFormatter={(d: number) => `${d} m`}
           />
+
+          {/* Sector boundaries */}
           {boundaries.map(d => (
             <ReferenceLine key={d} x={d} stroke="#4b5563" strokeDasharray="4 2" />
           ))}
+
+          {/* Full traces — always visible */}
           <Area
             type="monotone"
             dataKey="throttle"
@@ -110,6 +117,15 @@ export default function BrakeChart({ data, totalDistance }: Props) {
             fill="url(#brakeGrad)"
             dot={false}
           />
+
+          {/* Playback cursor */}
+          {cursorDistance > 0 && (
+            <ReferenceLine
+              x={cursorDistance}
+              stroke={CURSOR_COLOR}
+              strokeWidth={1.5}
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>

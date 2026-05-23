@@ -4,6 +4,7 @@ import TelemetryDashboard from './components/TelemetryDashboard';
 import TrackSelector from './components/TrackSelector';
 import { runSimulation, getTracks } from './api';
 import type { VehicleSetup, LapResult } from './api';
+import logoUrl from './assets/trackhunter.svg';
 
 const DEFAULT_SETUP: VehicleSetup = {
   mass: 720,
@@ -47,13 +48,16 @@ export default function App() {
   }, []);
 
   // Derived playback values
-  const telemetry         = result?.telemetry ?? [];
-  const currentPoint      = telemetry[playbackIndex] ?? null;
-  const totalLapDist      = telemetry.length > 0 ? telemetry[telemetry.length - 1].distance : 0;
-  const playbackProgress  =
-    totalLapDist > 0 && currentPoint ? currentPoint.distance / totalLapDist : 0;
-  // Slice shown to charts — grows from one point to full lap as playback runs
-  const displayedTelemetry = telemetry.slice(0, playbackIndex + 1);
+  const telemetry        = result?.telemetry ?? [];
+  const currentPoint     = telemetry[playbackIndex] ?? null;
+  const totalLapDist     = telemetry.length > 0 ? telemetry[telemetry.length - 1].distance : 0;
+  const playbackProgress = totalLapDist > 0 && currentPoint
+    ? currentPoint.distance / totalLapDist : 0;
+
+  // Chart cursor — rounded to match chart x-axis values; null-safe
+  const cursorDistance = currentPoint ? Math.round(currentPoint.distance) : 0;
+  const currentSpeed   = currentPoint
+    ? parseFloat((currentPoint.speed * 3.6).toFixed(1)) : null;
 
   // Reset playback when a new simulation result arrives
   useEffect(() => {
@@ -127,8 +131,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <span className="app-logo">◈</span>
-        <h1>TrakHunter</h1>
+        <img src={logoUrl} alt="TrakHunter" className="app-logo-img" />
         <div className="header-right">
           <TrackSelector
             tracks={tracks}
@@ -171,7 +174,8 @@ export default function App() {
           baselineSetup={baselineSetup}
           currentPoint={currentPoint}
           isPlaying={isPlaying}
-          displayedTelemetry={displayedTelemetry}
+          cursorDistance={cursorDistance}
+          currentSpeed={currentSpeed}
         />
       </main>
     </div>

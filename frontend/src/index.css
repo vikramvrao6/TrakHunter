@@ -38,13 +38,12 @@ body { min-height: 100vh; }
   border-bottom: 1px solid var(--border);
   background: var(--panel);
 }
-.app-logo  { font-size: 20px; color: var(--accent); }
-.app-header h1 {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text-head);
-  text-transform: uppercase;
+.app-logo-img {
+  height: 26px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+  image-rendering: crisp-edges;   /* keep paths sharp on HiDPI */
 }
 .header-right {
   margin-left: auto;
